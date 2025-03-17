@@ -10,6 +10,7 @@ const {
 } = require('./lib');
 
 app.use(express.json());
+app.set('json spaces', 2);
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));

@@ -53,6 +53,38 @@ router.get('/files', (req, res) => {
   res.json(fileHashMap);
 });
 
+router.post('/webhook', (req, res) => {
+  try {
+    console.log('Webhook dari Railway diterima:', req.body);
+    
+    // Validasi payload jika diperlukan
+    const payload = req.body;
+    
+    // Proses event berdasarkan jenisnya
+    if (payload.type === 'DEPLOYMENT_SUCCEEDED') {
+      console.log('Deployment berhasil:', payload.deployment?.id);
+      // Lakukan tindakan yang diperlukan setelah deployment berhasil
+    } else if (payload.type === 'DEPLOYMENT_FAILED') {
+      console.log('Deployment gagal:', payload.deployment?.id);
+      // Tangani kasus deployment gagal
+    } else {
+      console.log('Event webhook lainnya:', payload.type);
+    }
+    
+    // Selalu kirim respons sukses
+    res.status(200).json({
+      success: true,
+      message: 'Webhook diterima dan diproses'
+    });
+  } catch (error) {
+    console.error('Error saat memproses webhook:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Gagal memproses webhook: ' + error.message 
+    });
+  }
+});
+
 router.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(500).json({ 

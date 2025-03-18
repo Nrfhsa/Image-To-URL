@@ -212,6 +212,11 @@ curl "http://localhost:3000/delete?apikey=your_api_key&image=all"
   "success": true,
   "message": "File deleted successfully"
 }
+
+{
+  "success": true,
+  "message": "All files deleted successfully"
+}
 ```
 
 **Example Output (Error):**

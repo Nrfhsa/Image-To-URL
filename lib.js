@@ -5,13 +5,42 @@ const multer = require('multer');
 
 const uploadDir = path.join(__dirname, 'public/images');
 const hashMapFile = path.join(__dirname, 'file-hash-map.json');
+const maxFileSize = 5 * 1024 * 1024;
 
-function ensureUploadDir() {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+/*==================== [ DIRECTORY INIT ] ====================*/
+function initializeFileHashMap() {
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true, mode: 0o755 });
+    }
+    console.log(`Upload directory initialized: ${uploadDir}`);
+  } catch (error) {
+    console.error('Directory initialization failed:', error);
+    process.exit(1);
   }
 }
 
+/*==================== [ FILE FILTER ] ====================*/
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    const error = new Error('INVALID_FILE_TYPE');
+    error.code = 'INVALID_FILE_TYPE';
+    cb(error);
+  }
+};
+
+/*==================== [ STORAGE ] ====================*/
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: maxFileSize }
+});
+
+/*==================== [ HASH MAP MANAGEMENT ] ====================*/
 const fileHashMap = {};
 
 function calculateFileHash(buffer) {
@@ -26,57 +55,34 @@ function saveFileHash(hash, filename) {
   fileHashMap[hash] = filename;
 }
 
-function initializeFileHashMap() {
-  ensureUploadDir();
-  if (fs.existsSync(uploadDir)) {
-    const files = fs.readdirSync(uploadDir);
-    files.forEach(filename => {
-      const filePath = path.join(uploadDir, filename);
-      const fileBuffer = fs.readFileSync(filePath);
-      const hash = calculateFileHash(fileBuffer);
-      fileHashMap[hash] = filename;
-    });
-  }
-}
-
 function loadHashMapFromDisk() {
-  if (fs.existsSync(hashMapFile)) {
-    try {
+  try {
+    if (fs.existsSync(hashMapFile)) {
       const data = fs.readFileSync(hashMapFile, 'utf8');
       Object.assign(fileHashMap, JSON.parse(data));
-    } catch (error) {
-      console.error('Error loading hash map:', error);
+      console.log(`Loaded hash map with ${Object.keys(fileHashMap).length} entries`);
     }
+  } catch (error) {
+    console.error('Error loading hash map:', error);
   }
 }
 
 function saveHashMapToDisk() {
-  fs.writeFileSync(hashMapFile, JSON.stringify(fileHashMap, null, 2));
+  try {
+    fs.writeFileSync(hashMapFile, JSON.stringify(fileHashMap, null, 2));
+    console.log(`Hash map saved (${Object.keys(fileHashMap).length} entries)`);
+  } catch (error) {
+    console.error('Error saving hash map:', error);
+  }
 }
 
-const storage = multer.memoryStorage();
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
-  const extValid = allowedTypes.test(path.extname(file.originalname));
-  const mimeValid = allowedTypes.test(file.mimetype);
-  if (extValid && mimeValid) return cb(null, true);
-  cb(new Error('Hanya file gambar yang diperbolehkan'));
-};
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
-});
-
 module.exports = {
-  ensureUploadDir,
-  calculateFileHash,
-  getExistingFileByHash,
-  saveFileHash,
   initializeFileHashMap,
   loadHashMapFromDisk,
   saveHashMapToDisk,
+  calculateFileHash,
+  getExistingFileByHash,
+  saveFileHash,
   upload,
   uploadDir,
   fileHashMap

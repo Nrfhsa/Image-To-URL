@@ -57,7 +57,7 @@ loadHashMapFromDisk();
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-  console.log(`Direktori upload: ${path.resolve('public/images')}`);
+  console.log(`Upload directory: ${path.resolve('public/images')}`);
 });
 
 /*==================== [ SAVE HASH MAP ] ====================*/

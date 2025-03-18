@@ -1,208 +1,192 @@
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Uploader</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .progress-bar {
-      height: 5px;
-      background-color: #3b82f6;
-      transition: width 0.3s ease;
-    }
-    #imagePreview {
-      max-width: 100%;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-    <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Image Uploader</h1>
-      <p class="text-gray-600 mt-2">Maximum file size 5MB</p>
-    </div>
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Image Uploader</title>  
+  <script src="https://cdn.tailwindcss.com"></script>  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+  <style>  
+    .progress-bar {  
+      height: 5px;  
+      background-color: #3b82f6;  
+      transition: width 0.3s ease;  
+    }  
+    #imagePreview {  
+      max-width: 100%;  
+      border-radius: 8px;  
+    }  
+  </style>  
+</head>  
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">  
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">  
+    <div class="text-center mb-6">  
+      <h1 class="text-2xl font-bold text-gray-800">Image Uploader</h1>  
+      <p class="text-gray-600 mt-2">Maximum file size 5MB</p>  
+    </div>  
+    <form id="uploadForm" class="space-y-4">  
+      <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">  
+        <input type="file" id="image" name="image"   
+               accept="image/jpeg, image/png, image/gif, image/webp"   
+               class="hidden">  
+        <label for="image" class="cursor-pointer">  
+          <i class="fas fa-image text-blue-500 text-3xl mb-2"></i>  
+          <p class="text-gray-700">Click to select image</p>  
+          <p class="text-sm text-gray-500 mt-1" id="fileName"></p>  
+        </label>  
+      </div>  
 
-    <form id="uploadForm" class="space-y-4">
-      <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-        <input type="file" id="image" name="image" 
-               accept="image/jpeg, image/png, image/gif, image/webp" 
-               class="hidden">
-        <label for="image" class="cursor-pointer">
-          <i class="fas fa-image text-blue-500 text-3xl mb-2"></i>
-          <p class="text-gray-700">Click to select image</p>
-          <p class="text-sm text-gray-500 mt-1" id="fileName"></p>
-        </label>
-      </div>
+      <div class="progress-container hidden">  
+        <div class="progress-bar"></div>  
+        <p class="text-sm text-gray-600 mt-1 text-center" id="progressText"></p>  
+      </div>  
 
-      <div class="progress-container hidden">
-        <div class="progress-bar"></div>
-        <p class="text-sm text-gray-600 mt-1 text-center" id="progressText"></p>
-      </div>
+      <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">  
+        Upload Image  
+      </button>  
 
-      <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
-        Upload Image
-      </button>
+      <div id="successMessage" class="p-4 bg-green-100 text-green-700 rounded-lg hidden"></div>  
+      <div id="errorMessage" class="p-4 bg-red-100 text-red-700 rounded-lg hidden"></div>  
+    </form>  
 
-      <div id="successMessage" class="p-4 bg-green-100 text-green-700 rounded-lg hidden"></div>
-      <div id="errorMessage" class="p-4 bg-red-100 text-red-700 rounded-lg hidden"></div>
-    </form>
-
-    <div id="result" class="mt-6 hidden">
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="flex gap-2 mb-4">
-          <input type="text" id="urlInput" readonly 
-                 class="flex-1 px-3 py-2 border rounded-lg">
-          <button id="copyBtn" 
-                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-            Copy
-          </button>
-        </div>
-        <img id="imagePreview" class="w-full" alt="Preview">
-      </div>
+    <div id="result" class="mt-6 hidden">  
+      <div class="bg-gray-50 p-4 rounded-lg">  
+        <div class="flex gap-2 mb-4">  
+          <input type="text" id="urlInput" readonly   
+                 class="flex-1 px-3 py-2 border rounded-lg">  
+          <button id="copyBtn"   
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">  
+            Copy  
+          </button>  
+        </div>  
+        <img id="imagePreview" class="w-full" alt="Preview">  
+      </div>  
     </div>
   </div>
-
-  <script>
-    const uploadForm = document.getElementById('uploadForm');
-    const imageInput = document.getElementById('image');
-    const fileName = document.getElementById('fileName');
-    const progressBar = document.querySelector('.progress-bar');
-    const progressText = document.getElementById('progressText');
-    const resultDiv = document.getElementById('result');
-    const successDiv = document.getElementById('successMessage');
-    const errorDiv = document.getElementById('errorMessage');
-
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        fileName.textContent = `${file.name} (${formatBytes(file.size)})`;
-      }
-    });
-
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(uploadForm);
-      const file = formData.get('image');
-
-      if (!file) {
-        showError('Please select an image file first');
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        showError('File size exceeds 5MB limit');
-        return;
-      }
-
-      resetUI();
-      toggleProgress(true);
-
-      try {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener('progress', (e) => {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = `${percent}%`;
-          progressText.textContent = `Uploading ${percent}%`;
-        });
-
-        xhr.addEventListener('load', handleResponse);
-        xhr.addEventListener('error', handleError);
-        xhr.addEventListener('abort', handleError);
-
-        xhr.open('POST', '/upload');
-        xhr.setRequestHeader('X-Client-IP', getClientIP());
-        xhr.send(formData);
-      } catch (error) {
-        handleError(error);
-      }
-    });
-
-    function handleResponse(e) {
-      const xhr = e.target;
-
-      try {
-        const data = JSON.parse(xhr.responseText);
-
-        if (xhr.status >= 200 && xhr.status < 300) {
-          showResult(data.imageUrl);
-          logUploadSuccess(data.fileInfo.filename);
-        } else {
-          showError(data.message || 'Upload failed');
-        }
-      } catch (error) {
-        showError('Invalid server response');
-      } finally {
-        toggleProgress(false);
-      }
-    }
-
-    function handleError(error) {
-      console.error('Upload error:', error);
-      showError('Connection error. Please try again');
-      toggleProgress(false);
-    }
-
-    function formatBytes(bytes) {
-      const units = ['B', 'KB', 'MB', 'GB'];
-      let i = 0;
-      while (bytes >= 1024 && i < units.length - 1) {
-        bytes /= 1024;
-        i++;
-      }
-      return `${bytes.toFixed(1)} ${units[i]}`;
-    }
-
-    function getClientIP() {
-      return window.connection?.localAddress || '';
-    }
-
-    function logUploadSuccess(filename) {
-      const timestamp = new Date().toLocaleString('en-US', { 
-        timeZone: 'Asia/Jakarta',
-        hour12: false 
-      });
-      console.log(`[${timestamp}] Upload successful | File: ${filename}`);
-    }
-
-    function resetUI() {
-      resultDiv.classList.add('hidden');
-      successDiv.classList.add('hidden');
-      errorDiv.classList.add('hidden');
-    }
-
-    function toggleProgress(show) {
-      document.querySelector('.progress-container').classList.toggle('hidden', !show);
-      progressBar.style.width = '0%';
-      progressText.textContent = '';
-    }
-
-    function showResult(url) {
-      document.getElementById('urlInput').value = url;
-      document.getElementById('imagePreview').src = url;
-      resultDiv.classList.remove('hidden');
-    }
-
-    function showError(message) {
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
-      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
-    }
-
-    function showSuccess(message) {
-      successDiv.textContent = message;
-      successDiv.classList.remove('hidden');
-      setTimeout(() => successDiv.classList.add('hidden'), 5000);
-    }
-
-    document.getElementById('copyBtn').addEventListener('click', () => {
-      const urlInput = document.getElementById('urlInput');
-      urlInput.select();
-      document.execCommand('copy');
-      showSuccess('URL copied successfully!');
-    });
+  <script>  
+    const uploadForm = document.getElementById('uploadForm');  
+    const imageInput = document.getElementById('image');  
+    const fileName = document.getElementById('fileName');  
+    const progressBar = document.querySelector('.progress-bar');  
+    const progressText = document.getElementById('progressText');  
+    const resultDiv = document.getElementById('result');  
+    const successDiv = document.getElementById('successMessage');  
+    const errorDiv = document.getElementById('errorMessage');  
+  
+    imageInput.addEventListener('change', (e) => {  
+      const file = e.target.files[0];  
+      if (file) {  
+        fileName.textContent = `${file.name} (${formatBytes(file.size)})`;  
+      }  
+    });  
+  
+    uploadForm.addEventListener('submit', async (e) => {  
+      e.preventDefault();  
+      const formData = new FormData(uploadForm);  
+      const file = formData.get('image');  
+  
+      if (!file) {  
+        showError('Please select an image file first');  
+        return;  
+      }  
+  
+      if (file.size > 5 * 1024 * 1024) {  
+        showError('File size exceeds 5MB limit');  
+        return;  
+      }  
+  
+      resetUI();  
+      toggleProgress(true);  
+  
+      try {  
+        const xhr = new XMLHttpRequest();  
+  
+        xhr.upload.addEventListener('progress', (e) => {  
+          const percent = Math.round((e.loaded / e.total) * 100);  
+          progressBar.style.width = `${percent}%`;  
+          progressText.textContent = `Uploading ${percent}%`;  
+        });  
+  
+        xhr.addEventListener('load', handleResponse);  
+        xhr.addEventListener('error', handleError);  
+        xhr.addEventListener('abort', handleError);  
+  
+        xhr.open('POST', '/upload');  
+        xhr.send(formData);  
+      } catch (error) {  
+        handleError(error);  
+      }  
+    });  
+  
+    function handleResponse(e) {  
+      const xhr = e.target;  
+  
+      try {  
+        const data = JSON.parse(xhr.responseText);  
+  
+        if (xhr.status >= 200 && xhr.status < 300) {  
+          showResult(data.imageUrl);  
+        } else {  
+          showError(data.message || 'Upload failed');  
+        }  
+      } catch (error) {  
+        showError('Invalid server response');  
+      } finally {  
+        toggleProgress(false);  
+      }  
+    }  
+  
+    function handleError(error) {  
+      console.error('Upload error:', error);  
+      showError('Connection error. Please try again');  
+      toggleProgress(false);  
+    }  
+  
+    function formatBytes(bytes) {  
+      const units = ['B', 'KB', 'MB', 'GB'];  
+      let i = 0;  
+      while (bytes >= 1024 && i < units.length - 1) {  
+        bytes /= 1024;  
+        i++;  
+      }  
+      return `${bytes.toFixed(1)} ${units[i]}`;  
+    }  
+  
+    function resetUI() {  
+      resultDiv.classList.add('hidden');  
+      successDiv.classList.add('hidden');  
+      errorDiv.classList.add('hidden');  
+    }  
+  
+    function toggleProgress(show) {  
+      document.querySelector('.progress-container').classList.toggle('hidden', !show);  
+      progressBar.style.width = '0%';  
+      progressText.textContent = '';  
+    }  
+  
+    function showResult(url) {  
+      document.getElementById('urlInput').value = url;  
+      document.getElementById('imagePreview').src = url;  
+      resultDiv.classList.remove('hidden');  
+    }  
+  
+    function showError(message) {  
+      errorDiv.textContent = message;  
+      errorDiv.classList.remove('hidden');  
+      setTimeout(() => errorDiv.classList.add('hidden'), 5000);  
+    }  
+  
+    function showSuccess(message) {  
+      successDiv.textContent = message;  
+      successDiv.classList.remove('hidden');  
+      setTimeout(() => successDiv.classList.add('hidden'), 5000);  
+    }  
+  
+    document.getElementById('copyBtn').addEventListener('click', () => {  
+      const urlInput = document.getElementById('urlInput');  
+      urlInput.select();  
+      document.execCommand('copy');  
+      showSuccess('URL copied successfully!');  
+    });  
   </script>
-</body>
+</body>  
 </html>

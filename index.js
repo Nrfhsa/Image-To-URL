@@ -37,6 +37,20 @@ app.use('/image', express.static(path.join(__dirname, 'public/images'), {
 
 app.use('/', router);
 
+/*==================== [ ERROR HANDLERS ] ====================*/
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
+});
+
+app.use((err, req, res, next) => {
+  console.error(`[${req.requestTime}] Error:`, err);
+  res.status(500).json({ 
+    success: false, 
+    message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : null
+  });
+});
+
 /*==================== [ INIT & SERVER ] ====================*/
 initializeFileHashMap();
 loadHashMapFromDisk();
@@ -46,7 +60,7 @@ app.listen(port, () => {
   console.log(`Direktori upload: ${path.resolve('public/images')}`);
 });
 
-// Interval untuk menyimpan hash map
+/*==================== [ SAVE HASH MAP ] ====================*/
 const { saveHashMapToDisk } = require('./lib');
 setInterval(saveHashMapToDisk, 5 * 60 * 1000);
 process.on('SIGINT', () => {

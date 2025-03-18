@@ -56,7 +56,7 @@ initializeFileHashMap();
 loadHashMapFromDisk();
 
 app.listen(port, () => {
-  console.log(`Server berjalan di port ${port}`);
+  console.log(`Server running on port ${port}`);
   console.log(`Direktori upload: ${path.resolve('public/images')}`);
 });
 

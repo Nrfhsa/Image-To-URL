@@ -76,6 +76,23 @@ function saveHashMapToDisk() {
   }
 }
 
+/*==================== [ MIDDLEWARE API KEY ] ====================*/
+const validateApiKey = (req, res, next) => {
+  const providedKey = req.query.apikey || req.headers['x-api-key'];
+  const validKey = process.env.API_KEY;
+
+  if (!validKey) {
+    console.error('API_KEY is not set in .env');
+    return res.status(500).json({ success: false, message: 'Server configuration error' });
+  }
+
+  if (providedKey === validKey) {
+    next();
+  } else {
+    res.status(403).json({ success: false, message: 'Invalid API key' });
+  }
+};
+
 module.exports = {
   initializeFileHashMap,
   loadHashMapFromDisk,
@@ -85,5 +102,6 @@ module.exports = {
   saveFileHash,
   upload,
   uploadDir,
-  fileHashMap
+  fileHashMap, 
+  validateApiKey
 };
